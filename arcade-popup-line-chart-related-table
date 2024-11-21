@@ -1,0 +1,45 @@
+// Order the data by their measure date to get the first and last measurement
+var relatedMeasures = OrderBy(FeatureSetByRelationshipName($feature, "gauge_measure_data"), "datetime asc")
+var relatedMeasures_reverse = OrderBy(FeatureSetByRelationshipName($feature, "gauge_measure_data"), "datetime desc")
+var firstDate = Text(First(relatedMeasures).datetime, "DD.MM.YYYY")
+var lastDate = Text(First(relatedMeasures_reverse).datetime, "DD.MM.YYYY")
+
+// Prepare the properties for the line chart
+var chartValues = {}
+var chartNames = []
+var title = 'Waterlevel measurement from ' + firstDate + ' to ' + lastDate
+var caption = 'Chart shows the waterlevel measurement during a day (measured every 15 minutes). All values are in cm.'
+
+// at the date and the corresponding measurement value for the chart
+for (var f in relatedMeasures) {
+  var shortDate = Text(f.datetime, "DD.MM.YY h:mm A")
+  var Value = 0
+  if(!IsEmpty(f.value)) {
+    Value = f.value*100
+    chartValues[shortDate] = Value
+    Push(chartNames, shortDate)
+  }
+}
+
+// if there is data, then return a line chart
+if(count(chartNames) >= 1) {
+  return {
+    type: 'media',
+    attributes: chartValues,
+    mediaInfos: [{
+      type: 'linechart',
+      title: title,
+      caption: caption,
+      value : {
+        fields: chartNames
+      }
+    }]
+  }
+} 
+// if no data is given, than do not return a chart
+else {
+  return {
+    type: 'text',
+    text: 'Ups, we do not have any data here!'
+  }
+}
