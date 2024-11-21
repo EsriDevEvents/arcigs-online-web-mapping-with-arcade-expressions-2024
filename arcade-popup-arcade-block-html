@@ -1,0 +1,34 @@
+// function to place image to the side of the text
+function buildbox(imageURL, txt) {
+	return '<figure class="table"><table><tbody><tr><td width=50px;height=50px><img src="' + imageURL + '" alt="" height=50 width=50 /></td><td width=5px></td><td>' + txt + '</td></tr></tbody></table></figure>'
+}
+
+//// Earthquakes
+/// Returns teh number of earthquakes that were recorded within each county
+var inteq = Intersects(FeatureSetByName($map, "Earthquake"), $feature)
+var countofEarthquakes = Count(inteq)
+/// Counts the earthquakes that were induced by human activity within each county
+var inteq_induced = Filter(inteq, "EXPL_DE = 'induziert'")
+var CountInducedEQ = Count(inteq_induced)
+var earthquakeText = IIF(countofEarthquakes > 0, "The Earthquake catalogue from the German Institute for Geosciences and Natural Resources shows <strong>" + text(countofEarthquakes) + " recorded earthquakes </strong> in this county of which <strong>" + text(CountInducedEQ) + " were induced by human activites </strong>.", "The Earthquake catalogue from the German Institute for Geosciences and Natural Resources shows <strong> no recorded earthquakes </strong> for this county.")
+
+
+//// Fire fighter stations
+/// Counts the number of fire fighter stations within the county based on a item from the Living Atlas
+var fireFighterLayer = FeatureSetByPortalItem(Portal('https://www.arcgis.com/'), "dcaaba58109f4bfbbac8de48bb8f129d", 0)
+var countyName = $feature.GEN
+var countFireFighters = Count(Filter(fireFighterLayer, "GEN_1 = @countyName"))
+var fireFightersText = "There are <strong>" + Text(countFireFighters) + " fire fighter stations </strong> within this county."
+
+
+// Images
+var earthquakeImage = "https://static.thenounproject.com/png/1036413-200.png"
+var fireFighterImage= "https://static.thenounproject.com/png/1840780-200.png"
+
+// Final Text
+var finalText = '<span style="font-size:20px;">' + buildbox(earthquakeImage, earthquakeText) + "<br><br>" + buildbox(fireFighterImage, fireFightersText)
+
+return {
+	type: 'text',
+	text: finalText 
+}
