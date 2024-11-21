@@ -1,0 +1,42 @@
+/// Get the set browser language
+var userLocale = GetEnvironment().locale
+
+/// Define the text to be returned in all the available languages with their corresponding attributes
+var text_en = '<p>Status: ' + $feature.ENSTATUS + '</p> <p>Welcome to the park: ' + $feature.NAME_E + '. This is a park of the category ' + $feature.ENKATEGORIE + ' and is located in the following cantons: ' + $feature.KANTON + '. The ' + $feature.ENRECHTSGRUNDLAGE + ' forms the legal basis of this park.</p>'
+var text_fr = "<p>Statut: " + $feature.FRSTATUS + "</p> <p>Bienvenue dans le parc : " + $feature.NAME_F + ". Il s'agit d'un parc de la catégorie " + $feature.FRKATEGORIE + " et il se trouve dans les cantons suivants : " + $feature.KANTON + ". Le " + $feature.FRRECHTSGRUNDLAGE + " constitue la base juridique de ce parc.</p>"
+var text_de = '<p>Status: ' + $feature.DESTATUS + '</p> <p>Herzlich willkommen im Park: ' + $feature.NAME_D + '. Dies ist ein Park der Kategorie ' + $feature.DEKATEGORIE + ' und befindet sich in folgenden Kantonen: ' + $feature.KANTON + '. Die ' + $feature.DERECHTSGRUNDLAGE + ' bildet die Rechtsgrundlage dieses Parkes.</p>'
+var text_it = '<p>Stato: ' + $feature.ITSTATUS + '</p> <p>Benvenuti nel parco: ' + $feature.NAME_I + '. Questo è un parco di categoria ' + $feature.ITKATEGORIE + ' e si trova nei seguenti cantoni: ' + $feature.KANTON + '. Il' + $feature.ITRECHTSGRUNDLAGE + ' costituisce la base giuridica di questo parco.</p>'
+
+/// Define a if-logic to return the correct text based on the browser language
+if (IsEmpty(userLocale)) {
+	return {
+		type: 'text',
+		text: text_en
+	}
+} else {
+	if (userLocale == 'fr') {
+		return {
+			type: 'text',
+			text: text_fr
+		}
+	} else {
+		if (userLocale == 'de') {
+			return {
+				type: 'text',
+				text: text_de
+			}
+		} else {
+			if (userLocale == 'it') {
+				return {
+					type: 'text',
+					text: text_it
+				}
+			} else {
+				return {
+					type: 'text',
+					text: text_en
+					}
+			}
+		}
+	}
+}
