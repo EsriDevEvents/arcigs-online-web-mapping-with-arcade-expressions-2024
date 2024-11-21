@@ -1,0 +1,4 @@
+if (TypeOf($userInput) == "Point") {
+  var result = PointToCoordinate($feature, $userInput)
+  return Text(((result.coordinate.m)/1000),'#.00')
+}
