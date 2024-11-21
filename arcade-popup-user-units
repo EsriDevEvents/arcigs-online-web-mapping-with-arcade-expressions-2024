@@ -1,0 +1,98 @@
+// removes nulls and if present
+Expects($feature,'*')
+
+// define necessary variables
+var fields = Schema($feature).fields
+var uPortal = Portal('https://www.arcgis.com')
+var currUser = GetUser(uPortal)
+var defaultDist = 'metric'
+var defaultDistUnit = 'm'
+var altDistUnit = 'ft'
+var defaultSpeed = 'metric'
+var defaultSpeedUnit = 'm/s'
+var altSpeedUnit = ' mph'
+var DistFieldNames = ['diameter','hubHeight']
+var SpeedFieldNames = ['cutInSpeed','cutOutSpeed','ratedSpeed']
+var uUnits = 'unknown'
+
+// if the user is not signed in, than use 'unknown' as the units, otherwise use the users units
+if (!IsEmpty(currUser)) {
+	uUnits = currUser.units
+}
+
+// returns the names of the attributes
+function getNames(field){
+	return field.name
+}
+
+// creates a Dictionary with metadata to each attribute
+function getFieldsMetaData() {
+	var field_meta = {}
+	for (var f in fields) {
+		field_meta[fields[f].name] = {
+			"alias": fields[f].alias,
+			"domain": HasKey(fields[f], "domain"),
+			"fieldType": fields[f].type,
+			"name": fields[f].name
+		}
+	}
+	return field_meta
+}
+
+// formats the attributes including speed and distance information and converts them if the user units are not the default ones
+function formatField(fieldMetaData) {
+	if (uUnits == 'unknown') {
+		return Round($feature[fieldMetaData.name],1)
+	} else {
+		var isDist = Includes(DistFieldNames, fieldMetaData.name)
+		var isSpeed = Includes(SpeedFieldNames, fieldMetaData.name)
+		if (isDist){
+			if (uUnits == defaultDist) {
+				return Round($feature[fieldMetaData.name],1) + ' ' + defaultDistUnit
+			} else {
+				var convtoFt = $feature[fieldMetaData.name] * 3.28084
+				return Round(convtoFt,1) + ' ' + altDistUnit
+			}
+		}
+		if (isSpeed) {
+			if (uUnits == defaultSpeed) {
+				return Round($feature[fieldMetaData.name], 1) + ' ' + defaultSpeedUnit
+			} else {
+				var convtomph = $feature[fieldMetaData.name] * 2.236936
+				return Round(convtomph,1) + ' ' + altSpeedUnit
+			}
+		}
+	}
+}
+
+// returns the attributes that include info about distance or speed and are not empty nor null
+function filterValidFields(fieldName){
+	var includesNames = Splice(DistFieldNames,SpeedFieldNames)
+	return includes(includesNames, fieldName) && !IsEmpty($feature[fieldName]) && !IsNan($feature[fieldName])
+}
+
+// pushes the potentially converted attribute values and their field names into the needed Dictionary and Array for the output
+var validFields = Filter(Map(fields, getNames), filterValidFields)
+var attributes = {}
+var fieldInfos = []
+var fieldMetaInfo = getFieldsMetaData()
+for (var f in validFields){
+	var fieldName = validFields[f]
+	var fieldMeta = fieldMetaInfo[fieldName]
+	var fieldAlias = fieldMeta.alias
+	var fieldAliasNeat = fieldAlias
+	if (uUnits != 'unknown') {
+		fieldAliasNeat = trim(left(fieldAlias,find("[", fieldAlias,0)))
+	}
+	Push(fieldInfos, {fieldName: fieldAliasNeat})
+	attributes[fieldAliasNeat] = formatField(fieldMeta)
+}
+
+// returns the actual table for the popup
+return {
+	title: "Wind Energy Turbine Specifications",
+	description: "Detailed Info about the Wind Energy Turbine",
+	type: "fields",
+	fieldInfos: fieldInfos,
+	attributes: attributes
+}
