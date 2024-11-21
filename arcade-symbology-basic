@@ -1,0 +1,2 @@
+var crit_infra = $feature.HOSPITALS + $feature.SCHOOLS
+return crit_infra
