@@ -1,0 +1,98 @@
+/// get the intersecting sites per Autonomous Community and change the Spanish words of the attribute "tecnologia_primaria" to Egnlish
+var intersectProductionSite = Intersects(FeatureSetByName($map, "Energy Production Sites"), $feature)
+var oldName1 = "Eolica"
+var newName1 = "Wind Power"
+var oldName2 = "Solar"
+var newName2 = "Solar"
+var oldName3 = "Hidraulica"
+var newName3 = "Hydraulics"
+var oldName4 = "Gas"
+var newName4 = "Gas"
+var oldName5 = "Petroleo"
+var newName5 = "Oil"
+var oldName6 = "Carbon"
+var newName6 = "Carbon"
+var oldName7 = "Residuos"
+var newName7 = "Waste"
+var oldName8 = "Nuclear"
+var newName8 = "Nuclear"
+var oldName9 = "Biomasa"
+var newName9 = "Biomass"
+
+// group by the Technology Type of the Production Site and count them
+var ProductionTypeList = GroupBy(intersectProductionSite, 'tecnologia_primaria', {name: 'count', expression: '1', statistic:'COUNT'})
+
+// order the grouped list by the count (descending)
+var sortedProduction = OrderBy(ProductionTypeList, 'count DESC')
+var chartValues = {}
+var chartNames = []
+
+/// load the values for the chart and set the new defined English words
+for (var f in sortedProduction) {
+	if (f.tecnologia_primaria == oldName1) {
+		chartValues[newName1] = f.count
+		Push(chartNames, newName1)
+	} else {
+			if (f.tecnologia_primaria == oldName2) {
+		chartValues[newName2] = f.count
+		Push(chartNames, newName2)
+			} else {
+					if (f.tecnologia_primaria == oldName3) {
+		chartValues[newName3] = f.count
+		Push(chartNames, newName3)
+					} else {
+							if (f.tecnologia_primaria == oldName4) {
+		chartValues[newName4] = f.count
+		Push(chartNames, newName4)
+							} else {
+									if (f.tecnologia_primaria == oldName5) {
+		chartValues[newName5] = f.count
+		Push(chartNames, newName5)
+									} else {
+											if (f.tecnologia_primaria == oldName6) {
+		chartValues[newName6] = f.count
+		Push(chartNames, newName6)
+											} else {
+													if (f.tecnologia_primaria == oldName7) {
+		chartValues[newName7] = f.count
+		Push(chartNames, newName7)
+													} else {
+															if (f.tecnologia_primaria == oldName8) {
+		chartValues[newName8] = f.count
+		Push(chartNames, newName8)
+															} else {
+																	if (f.tecnologia_primaria == oldName9) {
+		chartValues[newName9] = f.count
+		Push(chartNames, newName9)
+															}
+													}
+											}
+									}
+							}
+					}
+			}
+		}
+	}
+}
+
+/// return a text if there are no Energy Production Sites in a Autonomous Community
+if (Count(chartNames) == 0) {
+	return {
+		type: 'text',
+		text: 'There are no Energy Production Sites here!'
+	}
+}
+
+/// return the bar chart
+return {
+	type: 'media',
+	title: 'Energy Production Sites by Technology',
+	description: 'Chart showing the total of Energy Production Sites by Technology type',
+	attributes: chartValues,
+	mediaInfos: [{
+		type: 'columnchart',
+		value: {
+			fields: chartNames
+		}
+	}]
+}
