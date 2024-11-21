@@ -1,0 +1,17 @@
+var public_transport = FeatureSetByName($map, "Zurich Public Transport")
+var buffer_input = BufferGeodetic($feature, 3, "meter")
+var Lines = Intersects(public_transport, buffer_input)
+var closureLine = Geometry($feature).paths
+var firstVert = First(closureLine[0])
+var lastVert = Back(closureLine[0])
+var correct_line = ''
+for (var f in Lines) {
+  var firstM = Round(PointToCoordinate(f, firstVert).coordinate.m,2)
+  var lastM = Round(PointToCoordinate(f, lastVert).coordinate.m,2)
+  if(firstM < lastM) {
+    correct_line = f.Identifier
+  }
+}
+var selectedLine = First(Filter(Lines, "Identifier = @correct_line"))
+var result = Round((PointToCoordinate(selectedLine, lastVert).coordinate.m)/1000,2)
+return result
